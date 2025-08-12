@@ -1,0 +1,152 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Orders Saga Orchestrator",
+    "description": "Service for managing order sagas and their completion steps",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "OrdersSagaOrchestratorService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/sagas/orders/{orderId}": {
+      "get": {
+        "summary": "Получение саги заказа",
+        "description": "Получение информации о саге заказа и её шагах выполнения",
+        "operationId": "OrdersSagaOrchestratorService_GetOrderSaga",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/orderssagaorchestratorGetOrderSagaResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "orderId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "sagas"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "orderssagaorchestratorGetOrderSagaResponse": {
+      "type": "object",
+      "properties": {
+        "saga": {
+          "$ref": "#/definitions/orderssagaorchestratorOrderSaga"
+        }
+      },
+      "title": "Ответ с данными саги"
+    },
+    "orderssagaorchestratorOrderSaga": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "int64"
+        },
+        "orderId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "status": {
+          "$ref": "#/definitions/orderssagaorchestratorSagaStatus"
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/orderssagaorchestratorSagaStep"
+          }
+        }
+      },
+      "title": "Сага для заказа"
+    },
+    "orderssagaorchestratorSagaStatus": {
+      "type": "string",
+      "enum": [
+        "SAGA_STATUS_UNSPECIFIED",
+        "SAGA_STATUS_PENDING",
+        "SAGA_STATUS_COMPLETED",
+        "SAGA_STATUS_FAILED",
+        "SAGA_STATUS_COMPENSATED"
+      ],
+      "default": "SAGA_STATUS_UNSPECIFIED",
+      "title": "Статусы шага саги"
+    },
+    "orderssagaorchestratorSagaStep": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "\"ivnentory_check\" или \"payment_check\""
+        },
+        "status": {
+          "$ref": "#/definitions/orderssagaorchestratorSagaStepStatus"
+        }
+      },
+      "title": "Шаг саги"
+    },
+    "orderssagaorchestratorSagaStepStatus": {
+      "type": "string",
+      "enum": [
+        "SAGA_STEP_STATUS_UNSPECIFIED",
+        "SAGA_STEP_STATUS_COMPLETED",
+        "SAGA_STEP_STATUS_FAILED"
+      ],
+      "default": "SAGA_STEP_STATUS_UNSPECIFIED",
+      "title": "Статусы всей саги"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

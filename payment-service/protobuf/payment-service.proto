@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pkg/api/v1;api";
+package api.v1.paymentservice;
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    consumes: ["application/json"];
+    produces: ["application/json"];
+    info: {
+      title: "Payment service";
+      version: "1.0.0";
+      description: "Service for managing payments and reservations";
+    };
+};
+
+// Общий enum для статусов ответов
+enum ResponseStatus {
+    UNKNOWN = 0;
+    SUCCESS = 1;
+    INSUFFICIENT_QUANTITY = 2;
+    INTERNAL_ERROR = 3;
+}
+
+// Сообщение для запроса резервирования баланса пользователя
+message ReserveUserBalanceRequest {
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+    int64 amount = 2 [(validate.rules).int64.gt = 0];
+}
+
+// Сообщение для ответа на резервирование баланса пользователя
+message ReserveUserBalanceResponse {
+    ResponseStatus status = 1;
+}
+
+// Сообщение для запроса компенсации баланса пользователя
+message CompensateUserBalanceRequest {
+    int64 user_id = 1 [(validate.rules).int64.gt = 0];
+    int64 amount = 2 [(validate.rules).int64.gt = 0];
+}
+
+// Сообщение для ответа на компенсацию баланса пользователя
+message CompensateUserBalanceResponse {
+    ResponseStatus status = 1;
+}
+
+// Сервис управления балансом пользователей
+service PaymentService {
+    // Резервирование баланса пользователя
+    rpc ReserveUserBalance(ReserveUserBalanceRequest) returns (ReserveUserBalanceResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/balance/reserve"
+            body: "*"
+        };
+    }
+
+    // Компенсация баланса пользователя (отмена резервирования)
+    rpc CompensateUserBalance(CompensateUserBalanceRequest) returns (CompensateUserBalanceResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/balance/compensate"
+            body: "*"
+        };
+    }
+}

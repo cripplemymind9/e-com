@@ -1,0 +1,174 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Payment service",
+    "description": "Service for managing payments and reservations",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "PaymentService"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/balance/compensate": {
+      "post": {
+        "summary": "Компенсация баланса пользователя (отмена резервирования)",
+        "operationId": "PaymentService_CompensateUserBalance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/paymentserviceCompensateUserBalanceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/paymentserviceCompensateUserBalanceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PaymentService"
+        ]
+      }
+    },
+    "/api/v1/balance/reserve": {
+      "post": {
+        "summary": "Резервирование баланса пользователя",
+        "operationId": "PaymentService_ReserveUserBalance",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/paymentserviceReserveUserBalanceResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/paymentserviceReserveUserBalanceRequest"
+            }
+          }
+        ],
+        "tags": [
+          "PaymentService"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "paymentserviceCompensateUserBalanceRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "Сообщение для запроса компенсации баланса пользователя"
+    },
+    "paymentserviceCompensateUserBalanceResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/paymentserviceResponseStatus"
+        }
+      },
+      "title": "Сообщение для ответа на компенсацию баланса пользователя"
+    },
+    "paymentserviceReserveUserBalanceRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "amount": {
+          "type": "string",
+          "format": "int64"
+        }
+      },
+      "title": "Сообщение для запроса резервирования баланса пользователя"
+    },
+    "paymentserviceReserveUserBalanceResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "$ref": "#/definitions/paymentserviceResponseStatus"
+        }
+      },
+      "title": "Сообщение для ответа на резервирование баланса пользователя"
+    },
+    "paymentserviceResponseStatus": {
+      "type": "string",
+      "enum": [
+        "UNKNOWN",
+        "SUCCESS",
+        "INSUFFICIENT_QUANTITY",
+        "INTERNAL_ERROR"
+      ],
+      "default": "UNKNOWN",
+      "title": "Общий enum для статусов ответов"
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

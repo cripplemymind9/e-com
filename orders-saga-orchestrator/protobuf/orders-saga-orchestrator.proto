@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "pkg/api/v1;api";
+package api.v1.orderssagaorchestrator;
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    consumes: ["application/json"];
+    produces: ["application/json"];
+    info: {
+      title: "Orders Saga Orchestrator";
+      version: "1.0.0";
+      description: "Service for managing order sagas and their completion steps";
+    };
+};
+
+// Статусы шага саги
+enum SagaStatus {
+    SAGA_STATUS_UNSPECIFIED = 0;
+    SAGA_STATUS_PENDING = 1;
+    SAGA_STATUS_COMPLETED = 2;
+    SAGA_STATUS_FAILED = 3;
+    SAGA_STATUS_COMPENSATED = 4;
+}
+
+// Статусы всей саги
+enum SagaStepStatus {
+    SAGA_STEP_STATUS_UNSPECIFIED = 0;
+    SAGA_STEP_STATUS_COMPLETED = 1;
+    SAGA_STEP_STATUS_FAILED = 2;
+}
+
+// Шаг саги
+message SagaStep {
+    string name = 1 [(validate.rules).string = {min_len: 1}]; // "ivnentory_check" или "payment_check"
+    SagaStepStatus status = 2;
+}
+
+// Сага для заказа
+message OrderSaga {
+    int64 id = 1 [(validate.rules).int64 = {gt: 0}];
+    int64 order_id = 2 [(validate.rules).int64 = {gt: 0}];
+    SagaStatus status = 3;
+    repeated SagaStep steps = 4;
+}
+
+// Запрос на получение саги по ID заказа
+message GetOrderSagaRequest {
+    int64 order_id = 1 [(validate.rules).int64 = {gt: 0}];
+}
+
+// Ответ с данными саги
+message GetOrderSagaResponse {
+    OrderSaga saga = 1;
+}
+
+// Сервис для управления сагами заказов
+service OrdersSagaOrchestratorService {
+    // Получение саги по идентификатору заказа
+    rpc GetOrderSaga(GetOrderSagaRequest) returns (GetOrderSagaResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/sagas/orders/{order_id}"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            summary: "Получение саги заказа"
+            description: "Получение информации о саге заказа и её шагах выполнения"
+            tags: ["sagas"]
+        };
+    }
+}
