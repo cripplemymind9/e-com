@@ -1,0 +1,52 @@
+services:
+  db:
+    container_name: order_service_pg
+    image: postgres:15
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - order-network
+
+  cache:
+    container_name: order_service_redis
+    image: redis:latest
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - order-network
+    
+  app:
+    container_name: order_service_app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "${GRPC_PORT}:${GRPC_PORT}"
+    env_file:
+      - .env
+    networks:
+      - order-network
+      - kafka-network
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+
+networks:
+  order-network:
+    driver: bridge
+  kafka-network:
+    external: true
+  
